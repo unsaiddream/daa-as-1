@@ -1,43 +1,63 @@
 public class MergeSort {
 
-    private static final int Cutoff = 15;
-    public static void sort(int[] arr){
+    private static final int CUTOFF = 15;
 
-        if (arr == null || arr.length <= 1) return;
+    public static void sort(int[] arr, Metrics metrics) {
+
+        if (arr == null || arr.length <= 1) {
+            return;
+        }
 
         int[] temp = new int[arr.length];
 
-        mergeSort(arr, temp, 0, arr.length - 1);
+        mergeSort(arr, temp, 0, arr.length - 1, metrics, 1);
     }
 
     private static void mergeSort(
             int[] arr,
             int[] temp,
             int left,
-            int right
-    ){
-        if (right - left + 1 <= Cutoff){
-            insertionSort(arr, left, right);
+            int right,
+            Metrics metrics,
+            int depth
+    ) {
+
+        metrics.maxDepth = Math.max(metrics.maxDepth, depth);
+
+        if (right - left + 1 <= CUTOFF) {
+            insertionSort(arr, left, right, metrics);
             return;
         }
 
         int mid = left + (right - left) / 2;
 
-        mergeSort(arr, temp, left, mid);
+        mergeSort(arr, temp, left, mid, metrics, depth + 1);
 
-        mergeSort(arr, temp, mid + 1, right);
+        mergeSort(arr, temp, mid + 1, right, metrics, depth + 1);
 
-        merge(arr, temp, left, mid, right);
+        merge(arr, temp, left, mid, right, metrics);
     }
 
-    private static void insertionSort(int[] arr, int left, int right){
+    private static void insertionSort(
+            int[] arr,
+            int left,
+            int right,
+            Metrics metrics
+    ) {
 
-        for(int i = left + 1; i <= right; i++){
+        for (int i = left + 1; i <= right; i++) {
 
             int key = arr[i];
             int j = i - 1;
 
-            while (i >= left && arr[j] > key){
+            while (j >= left) {
+
+                metrics.comparisons++;
+
+                if (arr[j] <= key) {
+                    break;
+                }
+
                 arr[j + 1] = arr[j];
                 j--;
             }
@@ -46,8 +66,16 @@ public class MergeSort {
         }
     }
 
-    private static void merge(int[] arr, int[] temp, int left, int mid, int right){
-        for (int i = left; i <= right; i++){
+    private static void merge(
+            int[] arr,
+            int[] temp,
+            int left,
+            int mid,
+            int right,
+            Metrics metrics
+    ) {
+
+        for (int i = left; i <= right; i++) {
             temp[i] = arr[i];
         }
 
@@ -55,13 +83,14 @@ public class MergeSort {
         int j = mid + 1;
         int k = left;
 
-        while (i <= mid && j <= right){
-            if (temp[i] <= temp[i]){
+        while (i <= mid && j <= right) {
+
+            metrics.comparisons++;
+
+            if (temp[i] <= temp[j]) {
                 arr[k] = temp[i];
                 i++;
-            }
-
-            else {
+            } else {
                 arr[k] = temp[j];
                 j++;
             }
