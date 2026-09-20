@@ -37,6 +37,10 @@ public class Benchmark {
                 runSortBenchmark(writer, "quickSort", "random", n);
                 runSortBenchmark(writer, "quickSort", "sorted", n);
                 runSortBenchmark(writer, "quickSort", "duplicates", n);
+
+                runQuickSelectBenchmark(writer, "random", n);
+                runQuickSelectBenchmark(writer, "sorted", n);
+                runQuickSelectBenchmark(writer, "duplicates", n);
             }
         }
 
@@ -156,5 +160,56 @@ public class Benchmark {
         }
 
         return arr;
+    }
+
+    private static void runQuickSelectBenchmark(
+            PrintWriter writer,
+            String inputType,
+            int n
+    ) {
+        long[] times = new long[RUNS];
+
+        long comparisons = 0;
+        int maxDepth = 0;
+
+        int k = n / 2;
+
+        for (int run = 0; run < RUNS; run++) {
+            int[] arr = createInput(n, inputType);
+            Metrics metrics = new Metrics();
+
+            long start = System.nanoTime();
+
+            QuickSelect.select(arr, k, metrics);
+
+            long end = System.nanoTime();
+
+            metrics.timeNs = end - start;
+
+            times[run] = metrics.timeNs;
+            comparisons = metrics.comparisons;
+            maxDepth = metrics.maxDepth;
+        }
+
+        Arrays.sort(times);
+
+        long medianTimeNs = times[RUNS / 2];
+        double timeMs = medianTimeNs / 1_000_000.0;
+
+        writer.printf(
+                "quickSelect,%s,%d,%.3f,%d,%d%n",
+                inputType,
+                n,
+                timeMs,
+                comparisons,
+                maxDepth
+        );
+
+        System.out.printf(
+                "quickSelect | %s | n=%d | %.3f ms%n",
+                inputType,
+                n,
+                timeMs
+        );
     }
 }
